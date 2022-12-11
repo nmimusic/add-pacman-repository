@@ -1,0 +1,243 @@
+#/usr/bin/env bash
+if [ "$(whoami)" != "root" ]; then
+	echo "Need to be root or run with sudo. Exiting..."
+	exit 1
+fi
+
+set -u
+reponame=""
+sigcheck=""
+sigtrust=""
+server=""
+selected=""
+yesorno=""
+
+
+function main() {
+	echo -e "Add a repository? [1=yes or 2=no]"
+	local yesorno
+	read -n1 yesorno
+	case ${yesorno} in
+		1) caution ;;
+		2) exit 0 ;;
+	esac
+}
+
+function caution() {
+	yesorno=""
+	mkdir /tmp/add-pacman-repository
+	cp /etc/pacman.conf /etc/pacman.conf.bak
+	echo ""
+	echo "!!!CAUTION!!!"
+	echo "While the script is running, you MUST NOT press any arrow keys or stop working in the middle."
+	echo "If something goes wrong, run the following command to fix it:"
+	echo "sudo mv /etc/pacman.conf.bak /etc/pacman.conf"
+	repo_name
+}
+
+function repo_name() {
+	echo ""
+	echo "Enter repo name."
+	read reponame
+	if [[ ${reponame} == "" ]]; then
+		echo "Need to enter the repository name!"
+		repo_name
+	fi
+
+	echo -e "\n[${reponame}]"|tee -a /etc/pacman.conf
+	siglevel_setting
+}
+
+function siglevel_setting() {
+	yesorno=""
+	echo ""
+	echo "Set SigLevel? [1=yes or 2=no]"
+	read -n1 yesorno
+	case ${yesorno} in
+		1) repo_siglevel ;; 
+		2) repo_key
+	esac
+}
+
+function repo_siglevel() {
+	yesorno=""
+	echo ""
+	echo "Select the level of signature checking."
+	echo "1) Never    - All signature checking is suppressed."
+	echo "2) Optional - Signatures are checked if present."
+	echo "3) Required - Signatures are required."
+	read -n1 selected
+	case ${selected} in
+		1) echo "" && echo "SigLevel = Never"|tee -a /etc/pacman.conf;;
+		2) sigcheck=Optional ;;
+		3) sigcheck="Required DatabaseOptional" ;;
+	esac
+
+	if [[ ${selected} == "1" ]]; then
+		repo_server
+	fi
+
+	selected=""
+	echo ""
+	echo "Select the level of signature trusting."
+	echo "1) TrustedOnly - Signature must be fully trusted."
+	echo "2) TrustAll    - Signature isn't requred to be assigned a trust level."
+	read -n1 selected
+	case ${selected} in
+		1) sigtrust=TrustedOnly ;;
+		2) sigtrust=TrustAll    ;;
+	esac
+	echo ""
+	echo "SigLevel = ${sigcheck} ${sigtrust}"|tee -a /etc/pacman.conf
+	repo_key
+}
+
+function repo_key() {
+	yesorno=""
+	selected=""
+	echo ""
+	echo "Where do you import keyrings from?"
+	echo "1) Keyring files    - Extensions such as .key or .gpg"
+	echo "2) Key ID           - From online servers"
+	echo "3) Keyring packages - Extensions such as .zst or .xz"
+	echo "4) Not import any keyrings"
+	read -n1 selected
+	case ${selected} in
+		1) key_file  ;;
+		2) key_server ;;
+		3) key_pkgs   ;;
+		4) repo_server ;;
+	esac
+}
+
+function key_file() {
+	yesorno=""
+	selected=""
+	echo ""
+	echo "Download a keyring file from the Internet."
+	echo "Enter the URL. (example: https://example.com/hogehoge.key)"
+	local keyurl
+	read keyurl
+	if [[ ${keyurl} = "" ]]; then
+		echo "Need to enter the URL of the key!"
+		repo_key
+	fi
+ 	mkdir /tmp/add-pacman-repository/keyring
+	wget -O /tmp/add-pacman-repository/keyring/archive.key ${keyurl}
+	pacman-key --add /tmp/add-pacman-repository/keyring/archive.key
+	echo ""
+	echo "Sign to the key locally. Enter the Key-ID."
+	local keyid
+	read keyid
+	pacman-key --lsign-key ${keyid}
+	additional_keys
+}
+
+function key_server() {
+	yesorno=""
+	echo ""
+	echo "Import keyring from the Internet. Enter the Key-ID."
+	local keyid
+	read keyid
+	if [[ ${keyid} = "" ]]; then
+		echo "Need to enter the Key-ID!"
+		repo_key
+	fi
+	echo "Specify the key-server. (example: pgp.mit.edu)"
+	local keyserver
+	read keyserver
+	if [[ ${keyserver} = "" ]]; then
+		echo "Need to enter the key server URL!"
+		key_server
+	fi
+	pacman-key --recv-key ${keyid} --keyserver ${keyserver}
+	pacman-key --lsign-key ${keyid}
+	additional_keys
+}
+
+function key_pkgs() {
+	yesorno=""
+	echo ""
+	echo "Download a keyring package from the Internet. Enter the URL."
+	echo "(example: https://example.com/hoge/fuga-keyring-x.y.z-r-any.pkg.tar.zst)"
+	local pkgurl
+	read pkgurl
+	if [[ ${pkgurl} = "" ]]; then
+		echo "Need to enter the URL of keyring package!"
+		repo_key
+	fi
+ 	mkdir /tmp/add-pacman-repository/keyring
+	wget -NP /tmp/add-pacman-repository/keyring ${pkgurl}
+	yes|pacman -U /tmp/add-pacman-repository/keyring/*.zst
+	additional_keys
+}
+
+
+function additional_keys() {
+	echo "Import additional keys? [1=yes or 2=no]"
+	read -n1 yesorno
+	case ${yesorno} in
+		1) repo_key ;;
+		2) repo_server ;;
+	esac
+}
+
+function repo_server() {
+	yesorno=""
+	selected=""
+	echo ""
+	echo "Use a mirror server list?"
+	echo "1) Yes   - Mirror lists are usually placed in /etc/pacman.d/"
+	echo "2) No    - Use a server listed directly in /etc/pacman.conf"
+	read -n1 yesorno
+	case ${yesorno} in
+		1) server_mirrorlist ;;
+		2) server_directly ;;
+	esac
+}
+
+function server_mirrorlist() {
+	yesorno=""
+	echo ""
+	echo "Download a mirror list package from the Internet. Enter the URL."
+	echo "(example: https://example.com/hoge/fuga-mirrorlist-x.y.z-r-any.pkg.tar.zst)"
+	local pkgurl
+	read pkgurl
+	yes|pacman -U "${pkgurl}"
+	echo ""
+	echo "Enter the path to mirror list."
+	echo "(example: /etc/pacman.d/fuga-mirrorlist)"
+	local mirrorpath
+	read mirrorpath
+	echo "Include = ${mirrorpath}"|tee -a /etc/pacman.conf
+	sed -i 's/# Server/Server/g' ${mirrorpath}
+	echo "Import additional mirror lists? [1=yes or 2=no]"
+	read -n1 yesorno
+	case ${yesorno} in
+		1) server_mirrorlist ;;
+		2) repo_end ;;
+	esac
+}
+
+function server_directly() {
+	yesorno=""
+	echo ""
+	echo "Enter the URL of repository."
+	echo "(example: https://example.com/hoge/x86_64)"
+	local serverurl
+	read serverurl
+	echo "Server = ${serverurl}"|tee -a /etc/pacman.conf
+	repo_end
+	case ${yesorno} in
+		1) server_directly ;;
+		2) repo_end ;;
+	esac
+}
+
+function repo_end() {
+	pacman -Syyuu
+	rm -rf /tmp/add-pacman-repository
+	echo "Done!"	
+	exit 0
+}
+	main
