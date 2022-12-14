@@ -34,8 +34,6 @@ function caution() {
 		echo ""
 		echo "!!!CAUTION!!!"
 		echo "While the script is running, you MUST NOT press any arrow keys or stop working in the middle."
-		echo "If something goes wrong, run the following command to fix it:"
-		echo "sudo mv /etc/pacman.conf.bak /etc/pacman.conf"
 		repo_name
 	done
 }
@@ -293,7 +291,10 @@ function repo_end() {
 	cat ${tmpdir}/preview.txt|tee -a /etc/pacman.conf
 	pacman -Syyuu
 	rm -rf ${tmpdir}
-	echo "Done!"	
+	echo "Done!"
+	echo ""
+	echo "If something goes wrong, run the following command to fix it:"
+	echo "sudo mv /etc/pacman.conf.bak /etc/pacman.conf"
 	exit 0
 }
 
