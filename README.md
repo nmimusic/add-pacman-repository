@@ -10,7 +10,7 @@ Interactive shell script to help adding Pacman repositories.
 
 It is a command that shortens the work time when adding an external repository (PPA in Ubuntu style) with Arch-based distribution (including Manjaro) and MSYS2.
 
-## 導入方法
+## How to install
 ```
 yay -S add-pacman-repository
 ```
