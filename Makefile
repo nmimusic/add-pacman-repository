@@ -1,7 +1,7 @@
 PREFIX = /usr
 
 all:
-	@printf "Run 'make install' to install UniFetch.\n"
+	@printf "Run 'make install' to install add-pacman-repository.\n"
 
 install:
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
