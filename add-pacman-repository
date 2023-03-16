@@ -150,6 +150,7 @@ function key_server() {
 		echo ""
 		echo "Import keyring from the Internet. Enter the Key-ID."
 		echo "(To return to the previous, press return key.)"
+  read keyid
 		if [[ ${keyid} = "" ]]; then
 			repo_key
 		fi
