@@ -1,7 +1,7 @@
 # add-pacman-repository
 Pacmanリポジトリの追加を補助する対話型シェルスクリプト
 <p align="center">
-<a href="./LICENSE.md"><img src="https://img.shields.io/badge/license-GPL3-blue.svg"></a>
+<a href="./LICENSE_ja"><img src="file:///home/hay/uve/git/add-pacman-repository/README.md"></a>
 <a href="https://aur.archlinux.org/packages/add-pacman-repository/"><img src="https://img.shields.io/aur/version/add-pacman-repository.svg"></a>
 </p>
 
