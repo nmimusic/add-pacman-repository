@@ -82,41 +82,41 @@ INCLUDE=""
 SIGLEVEL=""
 REPO=""
 
-set +e
-_opt_short="r:f:k:p:m:s:i:l:hv"
-_opt_long="reponame:,fingerprint:,keyserver:,keypkg:,mirrorpkg:,server:,include:,siglevel:,help,version"
-OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}" 2> /dev/null)
-set -e
+#set +e
+#_opt_short="r:f:k:p:m:s:i:l:hv"
+#_opt_long="reponame:,fingerprint:,keyserver:,keypkg:,mirrorpkg:,server:,include:,siglevel:,help,version"
+#OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}" 2> /dev/null)
+#set -e
 
-eval set -- "${OPT}"
-echo "Arguments are \"${OPT}\""
-unset OPT _opt_short _opt_long
+#eval set -- "${OPT}"
+#echo "Arguments are \"${OPT}\""
+#unset OPT _opt_short _opt_long
 
-while true; do
-	case "${1}" in
-		-h | --help)
+while getopts r:f:k:p:m:s:i:l:hv OPT; do
+	case "${OPT}" in
+		h)
 			_usage
 			exit 0
 			;;
-		-r | --reponame)
+		r)
 			REPONAME="${2}"
 			shift 2
 			;;
-		-f | --fingerprint)
+		f)
 			KEYRING="fingerprint"
 			FINGERPRINT="${2}"
 			shift 2
 			;;
-		-k | --keyserver)
+		k)
 			KEYSERVER="${2}"
 			shift 2
 			;;
-		-p | --keypkg)
+		p)
 			KEYRING="package"
 			KEYPKG="${2}"
 			shift 2
 			;;
-		-m)
+		m)
 			if [[ ${2} == "" ]]; then
 				echo "ERROR: Specify the mirror list package!"
 				exit 1
@@ -125,17 +125,17 @@ while true; do
 			fi
 			shift 2
 			;;
-		-s)
+		s)
 			REPO="direct"
 			SERVER="${2}"
 			shift 2
 			;;
-		-i)
+		i)
 			REPO="mirrorlist"
 			INCLUDE="${2}"
 			shift 2
 			;;
-		-l)
+		l)
 			case ${2} in
 				r)
 					SIGLEVEL="Required DatabaseOptional"
@@ -160,14 +160,14 @@ while true; do
 			esac
 			shift 2
 			;;
-		-v)
+		v)
 			_version
 			exit 0
 			;;
-		--)
-			shift 1
-			break
-			;;
+#		--)
+#			shift 1
+#			break
+#			;;
 		*)
 			echo "ERROR: Invalid argument '${1}'!"
 			_usage
