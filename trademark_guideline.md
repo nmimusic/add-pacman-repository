@@ -38,6 +38,7 @@ Non-Commercial use is defined as production and sale by individuals or amateur g
 
 ## Article 7
 Explicit permission for use by the NJB is required for uses other than those specified in Articles 4 and 5. Examples are provided below.
+
 (I) All commercial uses.<br>
 (ii) Goods bearing the logo of NJB and each label, such as T-shirts, stickers, etc.<br>
 (iii) all services related to above (I) and (ii).<br>
@@ -50,7 +51,7 @@ In principle, the following uses are not permitted.<br>
 
 -----
 
-17 June 2023 Established
-18 June 2023 Added of concrete examples of (iii) and (iv) in article 3
-17 July 2023 Corrected some expressions, changed e-mail addresses
-1 February 2024 Purpose and organisation name changed
+17 June 2023 Established<br>
+18 June 2023 Added of concrete examples of (iii) and (iv) in article 3<br>
+17 July 2023 Corrected some expressions, changed e-mail addresses<br>
+1 February 2024 Purpose and organisation name changed<br>
